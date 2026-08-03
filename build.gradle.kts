@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.ktfmt)
 }
 
 android {
@@ -14,9 +16,20 @@ android {
         sourceCompatibility = JavaVersion.toVersion(libs.versions.javaVersion.get())
         targetCompatibility = JavaVersion.toVersion(libs.versions.javaVersion.get())
     }
-    testOptions {
-        unitTests.isIncludeAndroidResources = true
-    }
+    testOptions { unitTests.isIncludeAndroidResources = true }
+}
+
+ktfmt { kotlinLangStyle() }
+
+detekt {
+    config.setFrom(file("$rootDir/config/detekt/detekt.yml"))
+    baseline = file("detekt-baseline.xml")
+    buildUponDefaultConfig = true
+    ignoreFailures = false
+}
+
+tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
+    jvmTarget = libs.versions.javaVersion.get()
 }
 
 dependencies {
