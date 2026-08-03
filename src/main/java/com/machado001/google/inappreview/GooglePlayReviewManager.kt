@@ -1,8 +1,6 @@
 package com.machado001.google.inappreview
 
 import android.app.Activity
-import android.content.Context
-import androidx.core.content.edit
 import com.google.android.play.core.review.ReviewException
 import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManager
@@ -15,25 +13,23 @@ import kotlin.coroutines.resumeWithException
 
 class GooglePlayReviewManager(
     private val reviewManager: ReviewManager,
+    private val promptPolicy: ReviewPromptPolicy
 ) {
 
+    /**
+     * The only entry point into the review flow. Nothing is requested from Play — not even
+     * [ReviewManager.requestReviewFlow] — unless [promptPolicy] says the user is due.
+     *
+     * The ask is recorded before the flow is launched: a failed or throttled flow still consumed
+     * the user's goodwill for this session, so it must count against the lifetime cap.
+     */
     suspend fun maybeLaunchReview(activity: Activity) {
-        val prefs =
-            activity.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val launchCount = prefs.getInt(KEY_LAUNCH_COUNT, 0)
-        if (launchCount == 0) {
-            prefs.edit { putInt(KEY_LAUNCH_COUNT, launchCount + 1) }
-            return
-        }
+        if (!promptPolicy.shouldAskForReview()) return
+        promptPolicy.onReviewAsked()
         askForReview(activity)
     }
 
-    suspend fun askForReview(context: Context) {
-        val activity = context as? Activity ?: return
-        askForReview(activity)
-    }
-
-    suspend fun askForReview(activity: Activity) {
+    private suspend fun askForReview(activity: Activity) {
         try {
             reviewManager.launchReviewFlow(activity, getReviewInfo())
                 .addOnCompleteListener {
@@ -64,9 +60,4 @@ class GooglePlayReviewManager(
                     }
                 }
         }
-
-    private companion object {
-        private const val PREFS_NAME = "review_prefs"
-        private const val KEY_LAUNCH_COUNT = "review_launch_count"
-    }
 }
