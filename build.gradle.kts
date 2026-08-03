@@ -30,14 +30,13 @@ detekt {
     ignoreFailures = false
 }
 
-// JitPack builds this from a git tag and rewrites groupId/artifactId/version to
-// com.github.machado001:in-app-review:<tag> regardless of what's set here.
+// JitPack invokes Gradle with -Pversion=<tag>, which sets project.version directly.
 publishing {
     publications {
         register<MavenPublication>("release") {
             groupId = "com.github.machado001"
             artifactId = "in-app-review"
-            version = project.findProperty("VERSION_NAME")?.toString() ?: "unspecified"
+            version = project.version.toString()
 
             afterEvaluate { from(components["release"]) }
         }
