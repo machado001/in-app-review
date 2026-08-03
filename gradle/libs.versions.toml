@@ -1,0 +1,28 @@
+[versions]
+agp = "9.2.1"
+coreKtx = "1.19.0"
+junit = "4.13.2"
+kotlinxCoroutines = "1.9.0"
+review = "2.0.2"
+logcat = "0.4"
+robolectric = "4.16"
+detekt = "2.0.0-alpha.5"
+ktfmt = "0.26.0"
+
+compileSdk = "37"
+minSdk = "29"
+javaVersion = "17"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+review = { module = "com.google.android.play:review", version.ref = "review" }
+review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "review" }
+logcat = { module = "com.squareup.logcat:logcat", version.ref = "logcat" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "agp" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
+ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktfmt)
+    id("maven-publish")
 }
 
 android {
@@ -17,15 +18,30 @@ android {
         targetCompatibility = JavaVersion.toVersion(libs.versions.javaVersion.get())
     }
     testOptions { unitTests.isIncludeAndroidResources = true }
+
+    publishing { singleVariant("release") { withSourcesJar() } }
 }
 
 ktfmt { kotlinLangStyle() }
 
 detekt {
-    config.setFrom(file("$rootDir/config/detekt/detekt.yml"))
     baseline = file("detekt-baseline.xml")
     buildUponDefaultConfig = true
     ignoreFailures = false
+}
+
+// JitPack builds this from a git tag and rewrites groupId/artifactId/version to
+// com.github.machado001:in-app-review:<tag> regardless of what's set here.
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.github.machado001"
+            artifactId = "in-app-review"
+            version = project.findProperty("VERSION_NAME")?.toString() ?: "unspecified"
+
+            afterEvaluate { from(components["release"]) }
+        }
+    }
 }
 
 tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
